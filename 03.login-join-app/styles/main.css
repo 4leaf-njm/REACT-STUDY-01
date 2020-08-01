@@ -84,3 +84,40 @@
 .content .content__page.active {
   display: block;
 }
+
+.footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 120px;
+  background: #f2f2f2;
+}
+
+.footer .footer__inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 1280px;
+}
+
+.footer .footer__list > ul {
+  display: flex;
+}
+
+.footer .footer__list > ul > li {
+  padding-right: 15px;
+  font-size: 14px;
+}
+
+.footer .footer__sns > ul {
+  display: flex;
+}
+
+.footer .footer__sns > ul > li {
+  padding-left: 20px;
+}
+
+.footer .footer__sns > ul > li i {
+  color: #4e4a4a;
+}
