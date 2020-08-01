@@ -1,0 +1,297 @@
+<!--
+    WEB - HTML, CSS, JS 
+
+    PROGRAMMING - C언어, Java, Javascript, Python 
+
+    SERVER LANGUAGE - ASP, JSP, PHP
+
+    FRAMEWORK - SPRING, Node Express, DJANGO
+
+    Fonrtend Library - React
+
+    Database - Mysql, Oracle, Firebase
+
+    HTML, CSS, JS -> REACT -> Node js -> Firebase :: FULL STACK
+-->
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8" />
+    <title>TODO APP</title>
+    
+    <link rel="stylesheet" href="./styles/style.css" />
+</head>
+<body>
+    <div class="app">
+        <div class="app__inner">
+            <div class="app__header">
+                <div class="logo">
+                    <h1 class="logo__text">ToDo List App</h1>
+                </div>
+
+                <div class="search">
+                    <input type="text" id="search-keyword-js" class="search__inp" onkeydown="searchTodoKeydownHandler()" />
+                    <button type="button" class="search__btn" onclick="searchTodoHandler()"> 
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="app__body">
+                <div class="form-reg">
+                    <div>
+                        <label class="form-reg__chk"><input type="checkbox" id="todo-important-js" />IMPORTANT</label>
+                        <input type="text" id="todo-title-js" class="form-reg__inp" placeholder="ADD TODO ITEM" />
+                    </div>
+
+                    <div id="btn-insert-js">
+                        <button type="button" class="form-reg__btn form-reg__btn__color-blue" onclick="addTodoHandler()">ADD</button>
+                    </div>
+
+                    <div id="btn-update-js">
+                        <button type="button" class="form-reg__btn form-reg__btn__color-blue" onclick="updateTodoHandler()">UPDATE</button>
+                        <button type="button" class="form-reg__btn form-reg__btn__color-red" onclick="cancelTodoHandler()">CANCEL</button>
+                    </div>
+                </div>
+
+                <div class="item-list" id="item-list-js"></div>
+            </div>
+
+            <div class="app__footer">
+                <p>4LEAF SOFTWARE 2020 REACT STUDY TODO APP ALLRIGHTS RESERVED.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://kit.fontawesome.com/883397d8fc.js" crossorigin="anonymous"></script>
+    <script>
+        const todoList = []; // 할일 목록을 담을 배열
+        let todoSearchList = []; // 검색 결과를 담을 배열
+
+        let updateIndex;
+
+        init();
+
+        // 프로그램 시작시 어떤 작업을 수행해주는 함수
+        function init() {
+            getTodoList();
+
+            showTodoList(todoList);
+        }
+
+        // 초기 데이터 세팅해주는 함수
+        function getTodoList() {
+            /*
+                - 중요한지 안한지 ?
+                - 품절이 되었는지 안되었는지 ?
+                - 회원이 탈퇴되었는지 안되었는지 ?
+
+                true / false로 저장
+
+                boolean 형 데이터는 변수 네이밍을 앞에 is 를 붙임.
+            */
+
+            // 1. 데이터 생성
+            const data1 = {
+                title: "REACT STUDY",
+                isImportant: true
+            }
+
+            const data2 = {
+                title: "HTML5, CSS3, JAVASCRIPT STUDY",
+                isImportant: false
+            }
+
+            todoList.push(data1);
+            todoList.push(data2);
+
+            todoSearchList = [...todoList];
+        }
+
+        // 데이터를 화면에 보여주는 함수 
+        function showTodoList(list) {
+            // 데이터를 가지고 화면에 보여줌
+            // 2. 태그 구조 생성 
+            let html = '';
+
+            list.map(function(data, idx) {
+                html += `<div class="item">`;
+                html += `    <div>`;
+                // html += `        <h2 class="item__title"><i class="fas fa-star"></i>${data.title}</h2>`;
+
+                /*
+                 * IF 문 이용
+                 * html += `        <h2 class="item__title">`;
+                 * if(data.isImportant) {
+                 *     html += `<i class="fas fa-star"></i>`;
+                 * }
+                 * html += `${data.title}</h2>`;
+                 */
+
+                /*
+                 * 삼항연산자 이용
+                 */
+                html += `        <h2 class="item__title">${data.isImportant ? '<i class="fas fa-star"></i>' : ''}${data.title}</h2>`;
+                html += `    </div>`;
+                html += `    <div>`;
+                html += `        <button type="button" class="item__btn item__btn__color-blue" onclick="modifyTodoHandler(${idx}, '${data.title}', ${data.isImportant})"><i class="fas fa-pencil-alt"></i></button>`;
+                html += `        <button type="button" class="item__btn item__btn__color-red" onclick="removeTodoHandler(${idx})"><i class="fas fa-trash-alt"></i></button>`;
+                html += `    </div>`;
+                html += `</div>`;
+            })
+
+            // 3. 만든 태그를 화면에 삽입
+            const itemList = document.getElementById("item-list-js");
+            itemList.innerHTML = html;
+        }
+
+        // 검색 버튼 클릭 이벤트 핸들러 
+        function searchTodoHandler() {
+            searchTodoList();
+        }
+
+        // 검색 입력창 Keydown 이벤트 핸들러
+        function searchTodoKeydownHandler() {
+            // 엔터 입력했을 때 조건
+            if(event.keyCode === 13) {
+                // 검색 기능 실행
+                searchTodoList();
+            }
+        }
+
+        // 검색 기능을 수행하는 함수
+        function searchTodoList() {
+            // 1. Input 태그에서 검색 키워드를 받아온다.
+            const searchKeyword = document.getElementById("search-keyword-js");
+            
+            // 2. todoList 배열에 검색 키워드 들어있는지 체크해서 새로운 배열에 넣는다.
+            const searchList = [];
+            todoList.map(function(data) {
+                // data의 제목에 searchKeyword의 값이 포함되있는지 ?
+                /*
+                    1. indexOf - 값이 있으면 0 보다 큰 숫자 / 값이 없으면 -1
+                    2. includes - 값이 있으면 true / 값이 없으면 false
+                */
+                if(data.title.toLowerCase().includes(searchKeyword.value.toLowerCase())) {
+                    searchList.push(data);
+                }
+            })
+            todoSearchList = searchList;
+            
+            // 3. 검색 결과로 화면을 새로 그려준다. 
+            showTodoList(todoSearchList);
+        }
+
+        // 할일 추가 해주는 함수
+        function addTodoHandler() {
+            // 1. Input 태그에서 추가할 데이터를 받아온다. 
+            const inputTitle = document.getElementById("todo-title-js");
+            const inputImportant = document.getElementById("todo-important-js");
+            
+            // 2. 입력값 검증 (Validation) 
+            /*
+                방법 1. inputTitle.value === ""
+                방법 2. inputTitle.value.length < 1
+                방법 3. !inputTitle.value
+
+                undefined null "" false 0
+
+                inputTitle.value !== undefined && inputTitle.value !== null && inputTitle.value !== ""
+                !inputTitle.value
+            */
+            if(!inputTitle.value) { 
+                alert("추가할 할일을 입력해주세요.");
+                inputTitle.focus();
+                return;
+            }
+
+            // 3. 받아온 데이터로 JSON 데이터를 생성한다.
+            const data = {
+                title: inputTitle.value,
+                isImportant: inputImportant.checked 
+            }
+
+            // 4. 만든 데이터를 배열에 추가한다.
+            todoList.push(data);
+            todoSearchList = [...todoList];
+
+            // 5. 화면을 새로 그려준다. 
+            showTodoList(todoList);
+
+            // 6. 입력한 값을 초기화한다. 
+            inputTitle.value = "";
+            inputImportant.checked = false;
+
+            alert("추가 완료 되었습니다.");
+        }
+
+        // 할일 수정 해주는 함수
+        function modifyTodoHandler(title, isImportant) {
+            const btnInsert = document.getElementById("btn-insert-js");
+            const btnUpdate = document.getElementById("btn-update-js");
+       
+            btnInsert.style.display = "none";
+            btnUpdate.style.display = "flex";
+
+            const inputTitle = document.getElementById("todo-title-js");
+            const inputImportant = document.getElementById("todo-important-js");
+
+            inputTitle.value = title;
+            inputImportant.checked = isImportant;
+
+            inputTitle.focus();
+
+            todoList.map(function (data, idx) {
+                if(data.title === title) {
+                    updateIndex = idx;
+                    return;
+                }
+            });
+        }
+
+        // 할일 수정 처리 해주는 함수
+        function updateTodoHandler() {
+            const inputTitle = document.getElementById("todo-title-js");
+            const inputImportant = document.getElementById("todo-important-js");
+            
+            todoList[updateIndex] = {
+                title: inputTitle.value,
+                isImportant: inputImportant.checked
+            }
+
+            showTodoList(todoList);
+
+            alert("변경 되었습니다.");
+
+            inputTitle.value = "";
+            inputImportant.checked = false;
+        }
+
+        // 취소 버튼 클릭 핸들러
+        function cancelTodoHandler() {
+            const btnInsert = document.getElementById("btn-insert-js");
+            const btnUpdate = document.getElementById("btn-update-js");
+
+            btnInsert.style.display = "flex";
+            btnUpdate.style.display = "none";
+        }
+
+        // 할일 삭제 처리해주는 함수
+        function removeTodoHandler(idx) {
+            if(confirm("정말 삭제하시겠습니까?")) {
+                const removeData = todoSearchList[idx];
+
+                todoList.map(function(data, index) {
+                    if(data.title === removeData.title) {
+                        todoList.splice(index, 1);
+                        todoSearchList.splice(idx, 1);
+                    }
+                });
+
+                showTodoList(todoSearchList);
+
+                alert("삭제 되었습니다.");
+            }
+        }
+    </script>
+</body>
+</html>

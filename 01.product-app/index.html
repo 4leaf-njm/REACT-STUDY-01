@@ -1,0 +1,249 @@
+<!--
+    회사, 학교 => 지켜야 하는 최소한의 규율 
+    개발 세계 => 개발자들간에 지켜야 하는 최소한의 코딩 규칙 (관습, 관례)
+
+    (이것이 있어서 처음보는 개발자들과 협업을 해도 기본적인 코딩 스타일이 비슷해서 작업이 원활하게 진행)
+
+    관습 X 개발 추구 => (아주 기본적인 것 부터 서로 스타일이 다르기 때문에) 다른 개발자들과 협업 어려움 
+
+    관습 O 개발 추구 + 나만의 스타일, 기술 => 좋은 마인드의 개발자
+-->
+
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <title>PRODUCT APP</title>
+    <link rel="stylesheet" href="./styles/main.css">
+</head>
+
+<body>
+    <div class="app">
+        <div class="app__header">
+            <div class="logoArea">
+                <h1>로고</h1>
+            </div>
+            
+            <div class="searchArea">
+                <input type="text" id="search-keyword-js" onkeydown="searchKeydownHandler()" />
+                <button type="button" onclick="searchProductHandler()">검색</button>
+            </div>
+        </div>
+
+        <div class="app__body">
+            <div class="productArea" id="product-area-js"></div>
+        </div>
+
+        <div class="app__footer">
+            <p>4LEAF SOFTWARE 2020 ALL RIGHTS RESERVED</p>
+        </div>
+    </div>
+
+    <script>
+        /*
+            ECMA Script = 자바스크립트 표준 문법 (ES10)
+
+            ES5 => ES6 
+            var    const, let   
+
+            C, Java
+            1(int), 5.5(double, float), "abc"(String) 
+
+            Javascript
+            var a = 1; Number 
+            var b = "abc"; String
+            var c = true; Boolean
+            var d = []; Array
+            var e = {}; Object
+            var f = function() {}; Function 
+            a = "hello";
+
+            const a = 1; (상수)
+            a = "hello"; (X)
+
+            let a = 1;
+            let b;
+            a = "hello"; (O)
+
+            * const, let 어떤 상황에 쓰는게 좋은지 
+            1. 처음에는 const로 변수 생성
+            2. 값을 바꿔야되는 상황이 오면 let
+            
+            let 을 사용하지 않아도 되는 상황에서 쓰는 것 X
+        */
+
+        /*
+            하나의 함수에서는 하나의 일만 담당하도록 만들어주는게 좋아요.
+        */
+
+        /* 1. 상품 정보를 저장할 배열 생성 */
+
+        // 배열 변수를 생성 (전역변수)
+        const productTotalList = []; // 상품 전체를 담는 배열
+
+        let productList = [] // 실제로 보여주는 배열
+
+        init();
+
+        // 프로그램 실행 시 처음에 수행할 작업
+        function init() {
+            getProductList();
+            
+            showProductList(productTotalList);
+        }
+        
+        // 데이터베이스에서 상품 데이터 조회
+        function getProductList() {
+            // 원래는 데이터베이스에서 데이터를 가져와야 됨.
+            // JSON 
+            const data1 = {
+                "name": "노트북",
+                "price": 1500000,
+                "state": "구매대기"
+            };
+            const data2 = {
+                "name": "데스크탑",
+                "price": 2000000,
+                "state": "구매대기"
+            }
+            const data3 = {
+                "name": "아이패드",
+                "price": 1000000,
+                "state": "구매대기"
+            }
+            productTotalList.push(data1);
+            productTotalList.push(data2);
+            productTotalList.push(data3);
+
+            /*
+            productList.push(data1);
+            productList.push(data2);
+            productList.push(data3);
+            */
+
+            // productList = [productTotalList[0], productTotalList[1], productTotalList[2]];
+            
+            // ES6 ... 
+            productList = [...productTotalList];
+        }
+
+        // 검색한 키워드(상품명)에 따라 상품을 조회하는 기능
+        function searchProductHandler() {
+            // 검색 키워드 
+            const searchKeyword = document.getElementById("search-keyword-js");
+            
+            // 상품이랑 키워드랑 비교를 해서 상품명에 포함되는 것만 보여주기
+            // 검색 결과 
+            const searchList = [];
+            
+            productTotalList.map(function(product, idx) {
+                // product의 name 값이랑 searchKeyword 비교
+                
+                /* 
+                값이 있으면 index 값 0 부터 ~ 
+                값이 없으면 -1 
+                if(product.name.indexOf(searchKeyword.value) > -1) {
+                   searchList.push(product);
+                }
+                */
+                // ES6 includes 
+                if(product.name.includes(searchKeyword.value)) {
+                   searchList.push(product);
+                }
+            });
+
+            productList = searchList;
+
+            /* 검색 로직 + 화면을 그려주는 로직 */ 
+
+            // 화면을 그려주는 소스 
+            showProductList(productList); // 너가 화면 그려 ! 
+        }
+
+        // 엔터를 입력했을 때 검색 기능
+        function searchKeydownHandler() {
+            if(event.keyCode === 13) {
+                searchProductHandler();
+            }
+            /*
+            var a = "1"; // String
+            var b = 1; // Number 
+
+            console.log(a == b); // true
+            console.log(a === b); // false
+            */
+        }
+
+        // 상품 목록을 받아서 화면에 보여주는 기능
+        function showProductList(productList) {
+            /* 2. 배열을 반복문을 돌려서 HTML 태그로 생성 */
+            let html = '';
+
+            /*
+            for(let i=0; i<productList.length; i++) {
+                const product = productList[i];
+                
+                html += '<div class="productArea__box">';
+                html += '   <div>';
+                html += '       <p><span>상품명</span>' + product.name + '</p>';
+                html += '       <p><span>가격</span>' + product.price + '원</p>';
+                html += '       <p><span>상태</span>' + product.state + '</p>';
+                html += '   </div>';
+
+                html += '   <div>';
+                html += '       <button type="button">구매</button>';
+                html += '       <button type="button">삭제</button>';
+                html += '   </div>';
+                html += '</div>';
+            }
+            */
+            
+            // ES6 (map)
+            // 처음부터 끝까지 반복
+            productList.map(function(product, idx) { 
+                // `` 문자 + 변수
+                html += `<div class="productArea__box">`;
+                html += `   <div>`;
+                html += `       <p><span>상품명</span>${product.name}</p>`;
+                html += `       <p><span>가격</span>${product.price}원</p>`;
+                html += `       <p><span>상태</span>${product.state}</p>`;
+                html += `   </div>`;
+
+                html += `   <div>`;
+                html += `       <button type="button" onclick="buyProductHandler(${idx})">구매</button>`;
+                html += `       <button type="button" onclick="removeProductHandler(${idx})">삭제</button>`;
+                html += `   </div>`;
+                html += `</div>`;
+            });
+
+            /* 3. HTML 태그를 상품 영역에 삽입 */
+            const productArea = document.getElementById("product-area-js");
+            productArea.innerHTML = html;
+        }
+        
+        // 상품을 구매하는 기능
+        function buyProductHandler(index) {
+            productList[index].state = "구매완료";
+          
+            showProductList(productList);
+        }
+
+        // 상품을 삭제하는 기능
+        function removeProductHandler(index) {
+            // 아이디어를 떠올려야 됨.
+
+            // productList[index] 상품명 totalList 반복 상품명 같은거 삭제
+            productTotalList.map(function(product, idx) {
+                const data = productList[index]; // 삭제할 데이터
+              
+                if(product.name === data.name) {
+                    // 배열에 요소를 어떻게 삭제해 ? 알 필요 X, 구글 
+                    productTotalList.splice(idx, 1); 
+                    productList.splice(index, 1);
+                }
+            });
+            
+            showProductList(productList);
+        }
+    </script>
+</body>
+</html>
